@@ -1,0 +1,1229 @@
+local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/tbao143/Library-ui/refs/heads/main/Redzhubui"))()
+
+local Window = redzlib:MakeWindow({
+  Title = "quả cam hud",
+  SubTitle = "Blox Fruits Premium",
+  SaveFolder = "quacamHub_BloxFruits"
+})
+
+Window:AddMinimizeButton({
+    Button = { Image = "rbxassetid://129738938606820", BackgroundTransparency = 0 },
+    Corner = { CornerRadius = UDim.new(0, 5) },
+})
+
+-- ==================== SERVICES ====================
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VirtualUser = game:GetService("VirtualUser")
+local TeleportService = game:GetService("TeleportService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local Workspace = game:GetService("Workspace")
+
+-- ==================== GLOBAL VARIABLES ====================
+_G.Settings = {
+    -- Auto Farm
+    AutoFarm = false,
+    AutoFarmLevel = false,
+    FastAttack = false,
+    AutoNewWorld = false,
+    AutoThirdWorld = false,
+    SelectWeapon = "Melee",
+    
+    -- Mastery
+    AutoFarmMastery = false,
+    AutoFarmGunMastery = false,
+    AutoFarmFruitMastery = false,
+    KillPercent = 30,
+    SelectSkill = "Z",
+    
+    -- Boss
+    AutoBoss = false,
+    SelectBoss = nil,
+    AutoAllBoss = false,
+    AutoBossQuest = true,
+    
+    -- Stats
+    AutoMelee = false,
+    AutoDefense = false,
+    AutoSword = false,
+    AutoGun = false,
+    AutoFruit = false,
+    PointStats = 1,
+    
+    -- Fighting Style
+    AutoSuperhuman = false,
+    AutoDeathStep = false,
+    AutoSharkmanKarate = false,
+    AutoElectricClaw = false,
+    AutoDragonTalon = false,
+    AutoGodhuman = false,
+    
+    -- Bones
+    AutoBone = false,
+    AutoSoulReaper = false,
+    AutoHallow = false,
+    
+    -- Cake Prince
+    AutoCakePrince = false,
+    AutoDoughKing = false,
+    
+    -- Material
+    AutoFarmMaterial = false,
+    SelectMaterial = nil,
+    
+    -- Observation Haki
+    AutoObservation = false,
+    AutoObservationv2 = false,
+    
+    -- Rengoku
+    AutoRengoku = false,
+    AutoYama = false,
+    AutoTushita = false,
+    
+    -- Elite
+    AutoElite = false,
+    EliteHunterHop = false,
+    
+    -- Misc
+    AutoBuyChip = false,
+    AutoStartRaid = false,
+    SelectRaidChip = nil,
+    AutoAwaken = false,
+    AutoFarmRaid = false,
+    
+    -- Sea Events
+    AutoSeaBeast = false,
+    AutoPirateRaid = false,
+    AutoShip = false,
+    AutoTerrorshark = false,
+    
+    -- Teleport
+    TPSpeed = 300,
+    
+    -- Misc Settings
+    AntiAFK = true,
+    WhiteScreen = false,
+    AutoHaki = true,
+    AutoEquipMelee = false,
+    AutoEquipSword = false,
+    AutoEquipFruit = false,
+}
+
+-- ==================== FAST ATTACK SETTINGS ====================
+_G.FastAttackSettings = {
+    Enabled = false,
+    Mode = "Normal",
+    Distance = 60,
+    ClickDelay = 0.1,
+    UseSkills = false,
+    SkillZ = false,
+    SkillX = false,
+    SkillC = false,
+    SkillV = false,
+    SkillF = false,
+    MultiTarget = true,
+    AttackPlayers = false,
+    MeleeOnly = true,
+}
+
+-- Fast Attack Modes
+local FastAttackModes = {
+    ["Normal"] = {
+        Delay = 0.1,
+        Distance = 60,
+        Name = "Đánh Nhanh Thường"
+    },
+    ["Super"] = {
+        Delay = 0.05,
+        Distance = 80,
+        Name = "Siêu Cực Đánh Nhanh"
+    },
+    ["Ultra"] = {
+        Delay = 0.01,
+        Distance = 100,
+        Name = "Cực Siêu Đánh Nhanh"
+    },
+    ["Instant"] = {
+        Delay = 0,
+        Distance = 120,
+        Name = "Tức Thời Đánh Nhanh"
+    }
+}
+
+-- ==================== WORLD CHECK ====================
+function CheckWorld()
+    local placeId = game.PlaceId
+    if placeId == 2753915549 then
+        return "Sea 1"
+    elseif placeId == 4442272183 then
+        return "Sea 2"
+    elseif placeId == 7449423635 then
+        return "Sea 3"
+    end
+end
+
+_G.World = CheckWorld()
+
+-- ==================== NPC & BOSS LISTS ====================
+_G.NPCList = {
+    ["Sea 1"] = {
+        "Bandit", "Monkey", "Gorilla", "Pirate", "Brute", "Desert Bandit", "Desert Officer", 
+        "Snow Bandit", "Snowman", "Chief Petty Officer", "Sky Bandit", "Dark Master", 
+        "Prisoner", "Dangerous Prisoner", "Toga Warrior", "Gladiator", "Military Soldier", 
+        "Military Spy", "Fishman Warrior", "Fishman Commando", "God's Guard", "Shanda", 
+        "Royal Squad", "Royal Soldier", "Galley Pirate", "Galley Captain"
+    },
+    ["Sea 2"] = {
+        "Raider", "Mercenary", "Swan Pirate", "Factory Staff", "Marine Lieutenant", 
+        "Marine Captain", "Zombie", "Vampire", "Snow Trooper", "Winter Warrior", 
+        "Lab Subordinate", "Horned Warrior", "Magma Ninja", "Lava Pirate", 
+        "Ship Deckhand", "Ship Engineer", "Ship Steward", "Ship Officer",
+        "Arctic Warrior", "Snow Lurker", "Sea Soldier", "Water Fighter"
+    },
+    ["Sea 3"] = {
+        "Pirate Millionaire", "Pistol Billionaire", "Dragon Crew Warrior", "Dragon Crew Archer",
+        "Female Islander", "Giant Islander", "Marine Commodore", "Marine Rear Admiral",
+        "Fishman Raider", "Fishman Captain", "Forest Pirate", "Mythological Pirate",
+        "Jungle Pirate", "Musketeer Pirate", "Reborn Skeleton", "Living Zombie",
+        "Demonic Soul", "Posessed Mummy", "Peanut Scout", "Peanut President",
+        "Ice Cream Chef", "Ice Cream Commander", "Cookie Crafter", "Cake Guard",
+        "Baking Staff", "Head Baker", "Cocoa Warrior", "Chocolate Bar Battler",
+        "Sweet Thief", "Candy Rebel", "Candy Pirate", "Snow Demon"
+    }
+}
+
+_G.BossList = {
+    ["Sea 1"] = {
+        "The Gorilla King", "Bobby", "Yeti", "Mob Leader", "Vice Admiral", 
+        "Warden", "Chief Warden", "Swan", "Magma Admiral", "Fishman Lord", 
+        "Wysper", "Thunder God", "Cyborg", "Saber Expert"
+    },
+    ["Sea 2"] = {
+        "Diamond", "Jeremy", "Fajita", "Don Swan", "Smoke Admiral", "Cursed Captain",
+        "Darkbeard", "Order", "Awakened Ice Admiral", "Tide Keeper"
+    },
+    ["Sea 3"] = {
+        "Stone", "Island Empress", "Kilo Admiral", "Captain Elephant", "Beautiful Pirate",
+        "rip_indra True Form", "Cake Queen", "Dough King", "Soul Reaper"
+    }
+}
+
+_G.MaterialList = {
+    ["Sea 1"] = {"Magma Ore", "Angel Wings", "Leather", "Scrap Metal"},
+    ["Sea 2"] = {"Mystic Droplet", "Vampire Fang", "Radioactive Material", "Conjured Cocoa", "Dragon Scale"},
+    ["Sea 3"] = {"Mini Tusk", "Fish Tail", "Gunpowder", "Dragon Scale", "Demonic Wisp"}
+}
+
+-- ==================== FAST ATTACK SYSTEM ====================
+function InitializeFastAttack()
+    local _ENV = (getgenv or getrenv or getfenv)()
+    
+    local function SafeWaitForChild(parent, childName, timeout)
+        local success, result = pcall(function()
+            return parent:WaitForChild(childName, timeout or 5)
+        end)
+        return result
+    end
+    
+    -- Workspace Elements
+    local Enemies = Workspace:FindFirstChild("Enemies")
+    local Characters = Workspace:FindFirstChild("Characters")
+    
+    -- Remotes
+    local Modules = ReplicatedStorage:FindFirstChild("Modules")
+    local Net = Modules and Modules:FindFirstChild("Net")
+    
+    -- Find Remote Event with ID
+    local remote, idremote
+    for _, v in pairs({
+        ReplicatedStorage:FindFirstChild("Util"),
+        ReplicatedStorage:FindFirstChild("Common"),
+        ReplicatedStorage:FindFirstChild("Remotes"),
+        ReplicatedStorage:FindFirstChild("Assets"),
+        ReplicatedStorage:FindFirstChild("FX")
+    }) do
+        if v then
+            for _, n in pairs(v:GetChildren()) do
+                if n:IsA("RemoteEvent") and n:GetAttribute("Id") then
+                    remote, idremote = n, n:GetAttribute("Id")
+                end
+            end
+            v.ChildAdded:Connect(function(n)
+                if n:IsA("RemoteEvent") and n:GetAttribute("Id") then
+                    remote, idremote = n, n:GetAttribute("Id")
+                end
+            end)
+        end
+    end
+    
+    local FastAttack = {
+        Distance = _G.FastAttackSettings.Distance,
+        Equipped = nil
+    }
+    
+    local function IsAlive(character)
+        return character and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0
+    end
+    
+    local function ProcessEnemies(OthersEnemies, Folder)
+        if not Folder then return nil end
+        local BasePart = nil
+        for _, Enemy in pairs(Folder:GetChildren()) do
+            local HumanoidRootPart = Enemy:FindFirstChild("HumanoidRootPart")
+            local Humanoid = Enemy:FindFirstChild("Humanoid")
+            local Head = Enemy:FindFirstChild("Head")
+            
+            if HumanoidRootPart and Humanoid and Head and Humanoid.Health > 0 then
+                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    local distance = (HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                    if distance < FastAttack.Distance and Enemy ~= LocalPlayer.Character then
+                        for _, part in pairs(Enemy:GetChildren()) do
+                            if part:IsA("BasePart") then
+                                table.insert(OthersEnemies, {Enemy, part})
+                            end
+                        end
+                        BasePart = Head
+                    end
+                end
+            end
+        end
+        return BasePart
+    end
+    
+    function FastAttack:Attack(BasePart, OthersEnemies)
+        if not BasePart or #OthersEnemies == 0 or not Net then return end
+        
+        pcall(function()
+            if Net:FindFirstChild("RE/RegisterAttack") then
+                Net["RE/RegisterAttack"]:FireServer()
+            end
+            
+            if Net:FindFirstChild("RE/RegisterHit") then
+                local userId = tostring(LocalPlayer.UserId):sub(2, 4)
+                local coroutineId = tostring(coroutine.running()):sub(11, 15)
+                local identifier = userId .. coroutineId
+                
+                Net["RE/RegisterHit"]:FireServer(BasePart, OthersEnemies, {}, identifier)
+            end
+            
+            if remote and idremote and Net.seed then
+                local encrypted = string.gsub("RE/RegisterHit", ".", function(c)
+                    return string.char(bit32.bxor(string.byte(c), math.floor(Workspace:GetServerTimeNow() / 10 % 10) + 1))
+                end)
+                
+                local seed = Net.seed:InvokeServer() or 0
+                local xorValue = bit32.bxor(idremote + 909090, seed * 2)
+                
+                cloneref(remote):FireServer(encrypted, xorValue, BasePart, OthersEnemies)
+            end
+        end)
+    end
+    
+    function FastAttack:UseSkills()
+        if not _G.FastAttackSettings.UseSkills then return end
+        
+        local character = LocalPlayer.Character
+        if not character then return end
+        
+        local tool = character:FindFirstChildOfClass("Tool")
+        if not tool then return end
+        
+        if tool:GetAttribute("WeaponType") == "Blox Fruit" or tool.ToolTip == "Blox Fruit" then
+            if _G.FastAttackSettings.SkillZ then
+                VirtualInputManager:SendKeyEvent(true, "Z", false, game)
+                wait(0.1)
+                VirtualInputManager:SendKeyEvent(false, "Z", false, game)
+            end
+            
+            if _G.FastAttackSettings.SkillX then
+                VirtualInputManager:SendKeyEvent(true, "X", false, game)
+                wait(0.1)
+                VirtualInputManager:SendKeyEvent(false, "X", false, game)
+            end
+            
+            if _G.FastAttackSettings.SkillC then
+                VirtualInputManager:SendKeyEvent(true, "C", false, game)
+                wait(0.1)
+                VirtualInputManager:SendKeyEvent(false, "C", false, game)
+            end
+            
+            if _G.FastAttackSettings.SkillV then
+                VirtualInputManager:SendKeyEvent(true, "V", false, game)
+                wait(0.1)
+                VirtualInputManager:SendKeyEvent(false, "V", false, game)
+            end
+            
+            if _G.FastAttackSettings.SkillF then
+                VirtualInputManager:SendKeyEvent(true, "F", false, game)
+                wait(0.1)
+                VirtualInputManager:SendKeyEvent(false, "F", false, game)
+            end
+        end
+    end
+    
+    function FastAttack:AttackNearest()
+        local OthersEnemies = {}
+        
+        local Part1 = ProcessEnemies(OthersEnemies, Enemies)
+        local Part2 = ProcessEnemies(OthersEnemies, Characters)
+        
+        local character = LocalPlayer.Character
+        if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+        
+        local equippedWeapon = character:FindFirstChildOfClass("Tool")
+        
+        if equippedWeapon then
+            local weaponType = equippedWeapon:GetAttribute("WeaponType")
+            
+            if weaponType == "Blox Fruit" or equippedWeapon.ToolTip == "Blox Fruit" then
+                self:UseSkills()
+                if #OthersEnemies > 0 then
+                    self:Attack(Part1 or Part2, OthersEnemies)
+                end
+            
+            elseif weaponType == "Melee" or weaponType == "Sword" then
+                if #OthersEnemies > 0 then
+                    self:Attack(Part1 or Part2, OthersEnemies)
+                end
+                
+                if equippedWeapon:FindFirstChild("LeftClickRemote") then
+                    for _, enemyData in ipairs(OthersEnemies) do
+                        local enemy = enemyData[1]
+                        local hrp = enemy:FindFirstChild("HumanoidRootPart")
+                        if hrp then
+                            local direction = (hrp.Position - character:GetPivot().Position).Unit
+                            pcall(function()
+                                equippedWeapon.LeftClickRemote:FireServer(direction, 1)
+                            end)
+                        end
+                    end
+                end
+            end
+        elseif #OthersEnemies > 0 then
+            self:Attack(Part1 or Part2, OthersEnemies)
+        end
+    end
+    
+    function FastAttack:BladeHits()
+        if IsAlive(LocalPlayer.Character) then
+            self:AttackNearest()
+        end
+    end
+    
+    function FastAttack:UpdateMode(mode)
+        local config = FastAttackModes[mode]
+        if config then
+            self.Distance = config.Distance
+            _G.FastAttackSettings.Distance = config.Distance
+            _G.FastAttackSettings.ClickDelay = config.Delay
+        end
+    end
+    
+    task.spawn(function()
+        while task.wait() do
+            if _G.FastAttackSettings.Enabled then
+                pcall(function()
+                    FastAttack:BladeHits()
+                end)
+                task.wait(_G.FastAttackSettings.ClickDelay)
+            else
+                task.wait(0.5)
+            end
+        end
+    end)
+    
+    _ENV.rz_FastAttack = FastAttack
+    return FastAttack
+end
+
+local FastAttackInstance = InitializeFastAttack()
+
+-- ==================== TABS ====================
+local Tab1 = Window:MakeTab({"Trang Chủ", "home"})
+local Tab2 = Window:MakeTab({"Farm Cấp", "trending-up"})
+local Tab3 = Window:MakeTab({"Farm Boss", "skull"})
+local Tab4 = Window:MakeTab({"Thành Thạo", "zap"})
+local Tab5 = Window:MakeTab({"Chỉ Số", "bar-chart-2"})
+local Tab6 = Window:MakeTab({"Chiến Đấu", "sword"})
+local Tab7 = Window:MakeTab({"Trái Ác Quỷ", "cherry"})
+local Tab8 = Window:MakeTab({"Đột Kích", "zap-off"})
+local Tab9 = Window:MakeTab({"Biển Sâu", "anchor"})
+local Tab10 = Window:MakeTab({"Vật Phẩm", "package"})
+local Tab11 = Window:MakeTab({"Dịch Chuyển", "send"})
+local Tab12 = Window:MakeTab({"Cài Đặt", "settings"})
+
+-- ==================== TAB 1: TRANG CHỦ ====================
+local Section1_1 = Tab1:AddSection({"Thông Tin Người Chơi"})
+
+Tab1:AddParagraph({
+    Name = "Chào Mừng",
+    Description = "Người chơi: " .. LocalPlayer.Name .. "\nThế giới: " .. _G.World
+})
+
+Tab1:AddButton({
+    Name = "Redeem All Codes",
+    Description = "Nhập tất cả mã code",
+    Callback = function()
+        local Codes = {
+            "KITT_RESET", "Sub2CaptainMaui", "kittgaming", "Sub2Fer999", 
+            "Enyu_is_Pro", "Magicbus", "JCWK", "Starcodeheo", "Bluxxy",
+            "fudd10_v2", "SUB2GAMERROBOT_EXP1", "Sub2NoobMaster123",
+            "Sub2UncleKizaru", "Sub2Daigrock", "Axiore", "TantaiGaming",
+            "STRAWHATMAINE", "Sub2OfficialNoobie", "TheGreatAce", "Fudd10"
+        }
+        
+        for _, code in pairs(Codes) do
+            pcall(function()
+                ReplicatedStorage.Remotes.Redeem:InvokeServer(code)
+            end)
+        end
+        
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Code Redeemed";
+            Text = "Đã nhập tất cả code!";
+            Duration = 3;
+        })
+    end
+})
+
+-- ==================== TAB 2: FARM CẤP ====================
+local Section2_1 = Tab2:AddSection({"Cài Đặt Farm"})
+
+local WeaponDropdown = Tab2:AddDropdown({
+    Name = "Chọn Vũ Khí",
+    Description = "Chọn vũ khí để farm",
+    Options = {"Melee", "Sword", "Blox Fruit"},
+    Default = "Melee",
+    Callback = function(value)
+        _G.Settings.SelectWeapon = value
+    end
+})
+
+-- ==================== FAST ATTACK SYSTEM ====================
+local Section2_FastAttack = Tab2:AddSection({"⚔️ Fast Attack System"})
+
+local FastAttackModeDropdown = Tab2:AddDropdown({
+    Name = "Chế Độ Đánh Nhanh",
+    Description = "Chọn tốc độ đánh",
+    Options = {"Normal", "Super", "Ultra", "Instant"},
+    Default = "Normal",
+    Callback = function(value)
+        _G.FastAttackSettings.Mode = value
+        
+        local config = FastAttackModes[value]
+        if config then
+            _G.FastAttackSettings.ClickDelay = config.Delay
+            _G.FastAttackSettings.Distance = config.Distance
+            
+            if FastAttackInstance then
+                FastAttackInstance:UpdateMode(value)
+            end
+            
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Fast Attack";
+                Text = "Chế độ: " .. config.Name;
+                Duration = 3;
+            })
+        end
+    end
+})
+
+Tab2:AddToggle({
+    Name = "Bật Fast Attack",
+    Description = "Kích hoạt đánh nhanh tự động",
+    Default = false,
+    Callback = function(value)
+        _G.FastAttackSettings.Enabled = value
+        _G.Settings.FastAttack = value
+        
+        if value then
+            local mode = _G.FastAttackSettings.Mode
+            local config = FastAttackModes[mode]
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "⚔️ Fast Attack";
+                Text = "Đã BẬT: " .. (config and config.Name or "Normal");
+                Duration = 3;
+            })
+        else
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Fast Attack";
+                Text = "Đã TẮT";
+                Duration = 3;
+            })
+        end
+    end
+})
+
+local Section2_Skills = Tab2:AddSection({"🍒 Blox Fruit Skills"})
+
+Tab2:AddToggle({
+    Name = "Sử Dụng Skill Trái",
+    Description = "Tự động dùng skill khi farm (chỉ Blox Fruit)",
+    Default = false,
+    Callback = function(value)
+        _G.FastAttackSettings.UseSkills = value
+    end
+})
+
+Tab2:AddToggle({
+    Name = "Skill Z",
+    Description = "Tự động sử dụng skill Z",
+    Default = false,
+    Callback = function(value)
+        _G.FastAttackSettings.SkillZ = value
+    end
+})
+
+Tab2:AddToggle({
+    Name = "Skill X",
+    Description = "Tự động sử dụng skill X",
+    Default = false,
+    Callback = function(value)
+        _G.FastAttackSettings.SkillX = value
+    end
+})
+
+Tab2:AddToggle({
+    Name = "Skill C",
+    Description = "Tự động sử dụng skill C",
+    Default = false,
+    Callback = function(value)
+        _G.FastAttackSettings.SkillC = value
+    end
+})
+
+Tab2:AddToggle({
+    Name = "Skill V",
+    Description = "Tự động sử dụng skill V",
+    Default = false,
+    Callback = function(value)
+        _G.FastAttackSettings.SkillV = value
+    end
+})
+
+Tab2:AddToggle({
+    Name = "Skill F",
+    Description = "Tự động sử dụng skill F (Ultimate)",
+    Default = false,
+    Callback = function(value)
+        _G.FastAttackSettings.SkillF = value
+    end
+})
+
+local Section2_Settings = Tab2:AddSection({"⚙️ Cài Đặt"})
+
+Tab2:AddSlider({
+    Name = "Tầm Đánh",
+    Description = "Khoảng cách tối đa để tấn công",
+    Min = 30,
+    Max = 150,
+    Increase = 5,
+    Default = 60,
+    Callback = function(value)
+        _G.FastAttackSettings.Distance = value
+        if FastAttackInstance then
+            FastAttackInstance.Distance = value
+        end
+    end
+})
+
+Tab2:AddSlider({
+    Name = "Độ Trễ Đánh",
+    Description = "Delay giữa các đòn (giây)",
+    Min = 0,
+    Max = 0.5,
+    Increase = 0.01,
+    Default = 0.1,
+    Callback = function(value)
+        _G.FastAttackSettings.ClickDelay = value
+    end
+})
+
+local Section2_Presets = Tab2:AddSection({"📌 Cài Đặt Nhanh"})
+
+Tab2:AddButton({
+    Name = "✅ An Toàn (Normal)",
+    Description = "Delay 0.1s, Distance 60",
+    Callback = function()
+        _G.FastAttackSettings.Mode = "Normal"
+        _G.FastAttackSettings.ClickDelay = 0.1
+        _G.FastAttackSettings.Distance = 60
+        if FastAttackInstance then
+            FastAttackInstance:UpdateMode("Normal")
+        end
+    end
+    
+    Tab2:AddButton({
+    Name = "⚡ Cân Bằng (Super)",
+    Description = "Delay 0.05s, Distance 80",
+    Callback = function()
+        _G.FastAttackSettings.Mode = "Super"
+        _G.FastAttackSettings.ClickDelay = 0.05
+        _G.FastAttackSettings.Distance = 80
+        if FastAttackInstance then
+            FastAttackInstance:UpdateMode("Super")
+        end
+    end
+})
+
+Tab2:AddButton({
+    Name = "🔥 Mạnh (Ultra)",
+    Description = "Delay 0.01s, Distance 100",
+    Callback = function()
+        _G.FastAttackSettings.Mode = "Ultra"
+        _G.FastAttackSettings.ClickDelay = 0.01
+        _G.FastAttackSettings.Distance = 100
+        if FastAttackInstance then
+            FastAttackInstance:UpdateMode("Ultra")
+        end
+    end
+})
+
+Tab2:AddButton({
+    Name = "💀 Tối Đa (Instant)",
+    Description = "Delay 0s, Distance 120 - Nguy hiểm!",
+    Callback = function()
+        _G.FastAttackSettings.Mode = "Instant"
+        _G.FastAttackSettings.ClickDelay = 0
+        _G.FastAttackSettings.Distance = 120
+        if FastAttackInstance then
+            FastAttackInstance:UpdateMode("Instant")
+        end
+    end
+})
+
+
+-- ==================== AUTO EQUIP ====================
+local Section2_AutoEquip = Tab2:AddSection({"🗡️ Tự Động Trang Bị"})
+
+Tab2:AddToggle({
+    Name = "Auto Equip Melee",
+    Description = "Tự động trang bị Melee",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoEquipMelee = value
+        spawn(function()
+            while _G.Settings.AutoEquipMelee do
+                wait(1)
+                pcall(function()
+                    for _, v in pairs(LocalPlayer.Backpack:GetChildren()) do
+                        if v:IsA("Tool") and v:GetAttribute("WeaponType") == "Melee" then
+                            LocalPlayer.Character.Humanoid:EquipTool(v)
+                            break
+                        end
+                    end
+                end)
+            end
+        end)
+    end
+})
+
+
+Tab2:AddToggle({
+    Name = "Auto Equip Sword",
+    Description = "Tự động trang bị Sword",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoEquipSword = value
+        spawn(function()
+            while _G.Settings.AutoEquipSword do
+                wait(1)
+                pcall(function()
+                    for _, v in pairs(LocalPlayer.Backpack:GetChildren()) do
+                        if v:IsA("Tool") and v:GetAttribute("WeaponType") == "Sword" then
+                            LocalPlayer.Character.Humanoid:EquipTool(v)
+                            break
+                        end
+                    end
+                end)
+            end
+        end)
+    end
+})
+
+Tab2:AddToggle({
+    Name = "Auto Equip Blox Fruit",
+    Description = "Tự động trang bị Blox Fruit",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoEquipFruit = value
+        spawn(function()
+            while _G.Settings.AutoEquipFruit do
+                wait(1)
+                pcall(function()
+                    for _, v in pairs(LocalPlayer.Backpack:GetChildren()) do
+                        if v:IsA("Tool") and (v:GetAttribute("WeaponType") == "Blox Fruit" or v.ToolTip == "Blox Fruit") then
+                            LocalPlayer.Character.Humanoid:EquipTool(v)
+                            break
+                        end
+                    end
+                end)
+            end
+        end)
+    end
+})
+
+-- ==================== AUTO FARM LEVEL ====================
+local Section2_2 = Tab2:AddSection({"Auto Farm Cấp"})
+
+Tab2:AddToggle({
+    Name = "Auto Farm Level",
+    Description = "Tự động farm cấp theo quest",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoFarmLevel = value
+        spawn(function()
+            while _G.Settings.AutoFarmLevel do
+                wait()
+                pcall(function()
+                    local MyLevel = LocalPlayer.Data.Level.Value
+                    local Monster, QuestName, QuestLv, NPCPosition
+                    
+                    if _G.World == "Sea 1" then
+                        if MyLevel >= 1 and MyLevel < 10 then
+                            Monster = "Bandit"
+                            QuestName = "BanditQuest1"
+                            QuestLv = 1
+                        elseif MyLevel >= 10 and MyLevel < 15 then
+                            Monster = "Monkey"
+                            QuestName = "JungleQuest"
+                            QuestLv = 1
+                        elseif MyLevel >= 15 and MyLevel < 30 then
+                            Monster = "Gorilla"
+                            QuestName = "JungleQuest"
+                            QuestLv = 2
+                        elseif MyLevel >= 30 and MyLevel < 40 then
+                            Monster = "Pirate"
+                            QuestName = "BuggyQuest1"
+                            QuestLv = 1
+                        elseif MyLevel >= 40 and MyLevel < 60 then
+                            Monster = "Brute"
+                            QuestName = "BuggyQuest1"
+                            QuestLv = 2
+                        elseif MyLevel >= 60 and MyLevel < 75 then
+                            Monster = "Desert Bandit"
+                            QuestName = "DesertQuest"
+                            QuestLv = 1
+                        elseif MyLevel >= 75 and MyLevel < 90 then
+                            Monster = "Desert Officer"
+                            QuestName = "DesertQuest"
+                            QuestLv = 2
+                        elseif MyLevel >= 90 and MyLevel < 100 then
+                            Monster = "Snow Bandit"
+                            QuestName = "SnowQuest"
+                            QuestLv = 1
+                        elseif MyLevel >= 100 and MyLevel < 120 then
+                            Monster = "Snowman"
+                            QuestName = "SnowQuest"
+                            QuestLv = 2
+                        end
+                    end
+                    
+                    -- Take quest and farm
+                    if QuestName and Monster then
+                        -- Quest logic here
+                    end
+                end)
+            end
+        end)
+    end
+    
+    Tab2:AddToggle({
+    Name = "Auto Farm Kẻ Địch Gần",
+    Description = "Farm quái gần nhất",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoFarmNearest = value
+    end
+})
+
+-- ==================== TAB 3: FARM BOSS ====================
+local Section3_1 = Tab3:AddSection({"Chọn Boss"})
+
+local BossDropdown = Tab3:AddDropdown({
+    Name = "Chọn Boss",
+    Description = "Chọn boss để farm",
+    Options = _G.BossList[_G.World] or {},
+    Default = "",
+    Callback = function(value)
+        _G.Settings.SelectBoss = value
+    end
+})
+
+Tab3:AddToggle({
+    Name = "Auto Farm Boss",
+    Description = "Tự động farm boss đã chọn",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoBoss = value
+    end
+})
+
+Tab3:AddToggle({
+    Name = "Auto All Boss",
+    Description = "Farm tất cả boss",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoAllBoss = value
+    end
+})
+
+-- ==================== TAB 4: MASTERY ====================
+local Section4_1 = Tab4:AddSection({"Mastery"})
+
+Tab4:AddSlider({
+    Name = "% Máu Kẻ Địch",
+    Description = "Chuyển vũ khí khi máu còn %",
+    Min = 5,
+    Max = 100,
+    Increase = 5,
+    Default = 30,
+    Callback = function(value)
+        _G.Settings.KillPercent = value
+    end
+})
+
+Tab4:AddToggle({
+    Name = "Auto Farm Fruit Mastery",
+    Description = "Tăng thành thạo trái",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoFarmFruitMastery = value
+    end
+})
+
+Tab4:AddToggle({
+    Name = "Auto Farm Gun Mastery",
+    Description = "Tăng thành thạo súng",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoFarmGunMastery = value
+    end
+})
+
+-- ==================== TAB 5: STATS ====================
+local Section5_1 = Tab5:AddSection({"Auto Stats"})
+
+Tab5:AddSlider({
+    Name = "Điểm Cộng",
+    Description = "Số điểm mỗi lần",
+    Min = 1,
+    Max = 100,
+    Increase = 1,
+    Default = 1,
+    Callback = function(value)
+        _G.Settings.PointStats = value
+    end
+})
+
+Tab5:AddToggle({
+    Name = "Auto Melee",
+    Description = "Tự động cộng Melee",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoMelee = value
+        while _G.Settings.AutoMelee do
+            wait(0.1)
+            ReplicatedStorage.Remotes.CommF_:InvokeServer("AddPoint", "Melee", _G.Settings.PointStats)
+        end
+    end
+})
+
+Tab5:AddToggle({
+    Name = "Auto Defense",
+    Description = "Tự động cộng Defense",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoDefense = value
+        while _G.Settings.AutoDefense do
+            wait(0.1)
+            ReplicatedStorage.Remotes.CommF_:InvokeServer("AddPoint", "Defense", _G.Settings.PointStats)
+        end
+    end
+})
+
+Tab5:AddToggle({
+    Name = "Auto Sword",
+    Description = "Tự động cộng Sword",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoSword = value
+        while _G.Settings.AutoSword do
+            wait(0.1)
+            ReplicatedStorage.Remotes.CommF_:InvokeServer("AddPoint", "Sword", _G.Settings.PointStats)
+        end
+    end
+})
+
+Tab5:AddToggle({
+    Name = "Auto Gun",
+    Description = "Tự động cộng Gun",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoGun = value
+        while _G.Settings.AutoGun do
+            wait(0.1)
+            ReplicatedStorage.Remotes.CommF_:InvokeServer("AddPoint", "Gun", _G.Settings.PointStats)
+        end
+    end
+})
+
+Tab5:AddToggle({
+    Name = "Auto Devil Fruit",
+    Description = "Tự động cộng Devil Fruit",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoFruit = value
+        while _G.Settings.AutoFruit do
+            wait(0.1)
+            ReplicatedStorage.Remotes.CommF_:InvokeServer("AddPoint", "Devil Fruit", _G.Settings.PointStats)
+        end
+    end
+})
+
+-- ==================== TAB 6: FIGHTING STYLE ====================
+local Section6_1 = Tab6:AddSection({"Fighting Styles"})
+
+Tab6:AddToggle({
+    Name = "Auto Superhuman",
+    Description = "Tự động mua Superhuman",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoSuperhuman = value
+    end
+})
+
+Tab6:AddToggle({
+    Name = "Auto Death Step",
+    Description = "Tự động mua Death Step",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoDeathStep = value
+    end
+})
+
+Tab6:AddToggle({
+    Name = "Auto Electric Claw",
+    Description = "Tự động mua Electric Claw",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoElectricClaw = value
+    end
+})
+
+Tab6:AddToggle({
+    Name = "Auto Godhuman",
+    Description = "Tự động mua Godhuman",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoGodhuman = value
+    end
+})
+
+-- ==================== TAB 7: FRUIT ====================
+local Section7_1 = Tab7:AddSection({"Devil Fruit"})
+
+Tab7:AddToggle({
+    Name = "Auto Farm Fruit",
+    Description = "Tự động nhặt trái",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoFarmFruit = value
+    end
+})
+
+Tab7:AddToggle({
+    Name = "Auto Random Fruit",
+    Description = "Tự động mua random trái",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoRandomFruit = value
+    end
+})
+
+Tab7:AddButton({
+    Name = "Store Fruit",
+    Description = "Cất trái vào kho",
+    Callback = function()
+        ReplicatedStorage.Remotes.CommF_:InvokeServer("StoreFruit")
+    end
+})
+
+-- ==================== TAB 8: RAID ====================
+local Section8_1 = Tab8:AddSection({"Raid"})
+
+local RaidDropdown = Tab8:AddDropdown({
+    Name = "Chọn Chip",
+    Description = "Chọn chip raid",
+    Options = {"Flame", "Ice", "Quake", "Light", "Dark", "Spider", "Rumble", "Magma", "Buddha", "Dough"},
+    Default = "Flame",
+    Callback = function(value)
+        _G.Settings.SelectRaidChip = value
+    end
+})
+
+Tab8:AddToggle({
+    Name = "Auto Buy Chip",
+    Description = "Tự động mua chip",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoBuyChip = value
+    end
+})
+
+Tab8:AddToggle({
+    Name = "Auto Start Raid",
+    Description = "Tự động bắt đầu raid",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoStartRaid = value
+    end
+})
+
+Tab8:AddToggle({
+    Name = "Auto Farm Raid",
+    Description = "Tự động farm raid",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoFarmRaid = value
+    end
+})
+
+-- ==================== TAB 9: SEA ====================
+local Section9_1 = Tab9:AddSection({"Sea Events"})
+
+Tab9:AddToggle({
+    Name = "Auto Sea Beast",
+    Description = "Tự động farm Sea Beast",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoSeaBeast = value
+    end
+})
+
+Tab9:AddToggle({
+    Name = "Auto Pirate Raid",
+    Description = "Tự động farm Pirate Raid",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoPirateRaid = value
+    end
+})
+
+-- ==================== TAB 10: MATERIAL ====================
+local Section10_1 = Tab10:AddSection({"Materials"})
+
+local MaterialDropdown = Tab10:AddDropdown({
+    Name = "Chọn Material",
+    Description = "Chọn nguyên liệu",
+    Options = _G.MaterialList[_G.World] or {},
+    Default = "",
+    Callback = function(value)
+        _G.Settings.SelectMaterial = value
+    end
+})
+
+Tab10:AddToggle({
+    Name = "Auto Farm Material",
+    Description = "Farm nguyên liệu",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoFarmMaterial = value
+    end
+})
+
+Tab10:AddToggle({
+    Name = "Auto Farm Bone",
+    Description = "Farm xương",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.AutoBone = value
+    end
+})
+
+-- ==================== TAB 11: TELEPORT ====================
+local Section11_1 = Tab11:AddSection({"Teleport"})
+
+Tab11:AddButton({
+    Name = "Starter Island",
+    Description = "TP đến Starter Island",
+    Callback = function()
+        -- TP logic
+    end
+})
+
+
+-- ==================== TAB 12: SETTINGS ====================
+local Section12_1 = Tab12:AddSection({"Settings"})
+
+Tab12:AddToggle({
+    Name = "Anti AFK",
+    Description = "Chống AFK",
+    Default = true,
+    Callback = function(value)
+        _G.Settings.AntiAFK = value
+    end
+})
+
+Tab12:AddToggle({
+    Name = "White Screen",
+    Description = "Giảm lag",
+    Default = false,
+    Callback = function(value)
+        _G.Settings.WhiteScreen = value
+        if value then
+            RunService:Set3dRenderingEnabled(false)
+        else
+            RunService:Set3dRenderingEnabled(true)
+        end
+    end
+})
+
+Tab12:AddButton({
+    Name = "Server Hop",
+    Description = "Đổi server",
+    Callback = function()
+        local PlaceId = game.PlaceId
+        local Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceId .. '/servers/Public?sortOrder=Asc&limit=100'))
+        
+        for _, server in pairs(Site.data) do
+            if server.playing ~= server.maxPlayers and server.id ~= game.JobId then
+                TeleportService:TeleportToPlaceInstance(PlaceId, server.id, LocalPlayer)
+                wait(1)
+            end
+        end
+    end
+})
+
+Tab12:AddButton({
+    Name = "Rejoin",
+    Description = "Tham gia lại",
+    Callback = function()
+        TeleportService:Teleport(game.PlaceId, LocalPlayer)
+    end
+})
+
+-- ==================== ANTI AFK ====================
+if _G.Settings.AntiAFK then
+    LocalPlayer.Idled:Connect(function()
+        VirtualUser:CaptureController()
+        VirtualUser:ClickButton2(Vector2.new())
+    end)
+end
+
+-- ==================== NOTIFICATION ====================
+game.StarterGui:SetCore("SendNotification", {
+    Title = "Khỉ Cam Hub";
+    Text = "Script đã load thành công!\n⚔️ Fast Attack: Enabled\n🍒 Fruit Skills: Enabled\nWorld: " .. _G.World;
+    Icon = "rbxassetid://132815391220";
+    Duration = 5;
+})
+
+print("========================================")
+print("⚔️ KHỈ CAM HUB - BLOX FRUITS")
+print("✅ Fast Attack: LOADED")
+print("✅ Fruit Skills: ENABLED")
+print("✅ World: " .. _G.World)
+print("========================================")
